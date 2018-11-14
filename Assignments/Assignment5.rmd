@@ -1,0 +1,66 @@
+---
+title: "Assignment #5"
+author: "Huang Song Ren b04902099"
+date: "2018/10/22"
+output:
+  html_document:
+    df_print: paged
+    highlight: textmate
+    theme: spacelab
+    toc: yes
+---
+#Problem
+>Try to scrape and parse one news website (必須要是非得剖析背後的html不可的網站，例如鉅亨網背後是json，那就沒必要用html)
+>I choose apple news
+
+```{r load packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+# library(httr)
+# library(dplyr) 
+options(stringsAsFactors = F)
+```
+```{r}
+pre <- "https://tw.entertainment.appledaily.com"
+all_links <- c()
+for(p in 2:5){
+  url <- paste0("https://tw.entertainment.appledaily.com/realtime/", p)
+  doc <- read_html(url)
+  css <- "li.rtddt a"
+  node.a <- html_nodes(doc, css)
+  links <- html_attr(node.a, "href")
+  links <- paste0(pre, links)
+	all_links <- c(all_links, links)
+}
+```
+```{r}
+post.df <- data.frame()
+for(link in all_links){
+  # print(link)
+  doc <- read_html(link)
+  title.css <- ".ndArticle_leftColumn h1"
+  title <- html_text(html_nodes(doc, title.css))
+  title <- gsub('[\r\n\t[:space:]]', '', title)
+  # title
+  time.css <- ".ndArticle_creat"
+  time <- html_text(html_nodes(doc, time.css))
+  time <- substr(time, 6, nchar(time))
+  # time
+  post.xpath <- '//*[@class="ndArticle_margin"]/p/text()'
+  post.paragraph <- html_text(html_nodes(doc, xpath = post.xpath))
+  post <- paste(post.paragraph, collapse = "")
+  # post
+  temp.df <- data.frame(post,
+                        title = title,
+                        timestamp = time,
+                        url = link
+                        )
+  post.df <- bind_rows(post.df, temp.df)
+}
+```
+```{r}
+post.df
+saveRDS(post.df, "apple_news.rds")
+#test
+data <- readRDS("apple_news.rds")
+```

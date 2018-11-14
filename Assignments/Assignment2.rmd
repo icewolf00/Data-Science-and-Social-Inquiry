@@ -1,0 +1,156 @@
+---
+title: "Assignment #2"
+author: "Huang Song Ren b04902099"
+date: "2018/10/6"
+output:
+  html_document:
+    df_print: paged
+    number_sections: true
+    highlight: textmate
+    theme: spacelab
+    toc: yes
+---
+
+# Practice(R01_2)
+## Filtering data
+```{r}
+x.a <- rnorm(1000, 1, 10)
+# 1.1 Filter out extreme values out of two standard deviations
+x.a <- x.a[x.a < mean(x.a)+2*sd(x.a) & x.a > mean(x.a)-2*sd(x.a)]
+# 1.2 Plotting the distribution of the remaining vector x.a
+plot(density(x.a))
+# 1.3 Calculate the 25% 50% and 75% quantile of vector x.a. You may google "quantile r"
+quantile(x.a, probs = 0.25)
+quantile(x.a, probs = 0.50)
+quantile(x.a, probs = 0.75)
+# 1.4 Get the number between 25% to 75% and assign to x.a1
+x.a1 <- x.a[x.a > quantile(x.a, probs = 0.25) & x.a < quantile(x.a, probs = 0.75)]
+# 1.5 Plotting x.a1
+plot(x.a1)
+#(distribution of x.a1)
+plot(density(x.a1))
+```
+
+
+## Practice II: Accessing characters
+```{r}
+x.b <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k")
+
+# 2.1 Get only elements at odd positions and assign to x.b1
+x.b1 <- x.b[c(TRUE, FALSE)]
+x.b1
+# 2.2 Truncate the first 2 elements and the last 2 elements and assign to x.b2
+x.b2 <- c(head(x.b, 2), tail(x.b, 2))
+x.b2
+```
+
+
+# Practice(R01_4)
+1. Using mosaicplot() to check what happens if you swap the time and region in tapply()
+```{r}
+# 答：swap the time and region => 兩圖的時間(month)、地區(region)座標軸位置互換
+```
+2. does it possible to extract month  by substr()? (you may need to search how to extract the last n characters in R)
+```{r}
+# 答：possible,如下(substr(x, nchar(x)-4+1, nchar(x)-4+2))
+```
+
+前置動作
+```{r}
+url <- "http://data.taipei/opendata/datalist/datasetMeta/download?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=34a4a431-f04d-474a-8e72-8d3f586db3df"
+df <- read.csv(url, fileEncoding = "big5")
+# str(df)
+df$region <- substr(df$發生.現.地點, 4, 5)
+colors <- c('#D0104C', '#DB4D6D', '#E83015',  '#F75C2F',
+            '#E79460', '#E98B2A', '#9B6E23', '#F7C242',
+            '#BEC23F', '#90B44B', '#66BAB7', '#1E88A8')
+```
+
+```{r}
+x <- df$發生.現.日期
+# df$month <- substr(x, 3, 4) # is this correct? Try to modify it!
+df$month <- substr(x, nchar(x)-4+1, nchar(x)-4+2)
+res2 <- tapply(df$編號, list(df$month, df$region), length)
+res2[is.na(res2)] <- 0
+mosaicplot(res2, color=colors, border=0, off = 3, main="Theft rate of Taipei city (region by hour)")
+res2 <- tapply(df$編號, list(df$region, df$month), length)
+res2[is.na(res2)] <- 0
+mosaicplot(res2, color=colors, border=0, off = 3, main="Theft rate of Taipei city (region by hour)")
+#swap the time and region => 兩圖的時間(month)、地區(region)座標軸位置互換
+```
+
+# Practice(R01_5)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Loading tweet data
+
+* **Question** 當現在載入了他人所蒐集且開放的Trump's tweets後，你會形成什麼樣的假設？你會探討什麼問題？嘗試寫寫看，將來會在後面的課程中產生一份長達數百行的程式碼來分析這份資料。你可以試試看，該範例所問的問題，和你現在所問的問題像不像。
+```{r}
+# 答：
+# 1.假設：
+# Trump發文的長度越長，則讚數(favorite)、分享數(retweet)越少(因為現代人普遍較沒耐性看完長篇文章)
+# 2.探討問題：
+# 發文的時間點對於貼文讚數與分享數的影響
+```
+
+* **Question** 除了想像這份資料可以做什麼分析外，請嘗試執行下列程式碼。請問，下列程式碼的執行結果分別可以回答什麼樣的問題？
+```{r}
+# 答：
+# 可回答問題：
+# 1.Trump在tweet的發文所獲得的讚數頻率分布(普遍獲得多少讚數)
+# 2.Trump在tweet的發文的長度統計(撰文長度的習慣)
+```
+
+
+```{r}
+load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
+df <- trump_tweets_df
+```
+## Filter data
+```{r}
+filter.df <- df[df$favoriteCount > mean(df$favoriteCount) +2*sd (df$favoriteCount),]
+# View(fliter.df)
+
+filter.df2 <- df[df$retweetCount > mean(df$retweetCount) + 2* sd (df$retweetCount),]
+# View(fliter.df2)
+
+order.df <- df[order(df$favoriteCount, decreasing = TRUE),]
+# View(order.df[1:10,])
+```
+## by dplyr
+```{r}
+library(tidyverse)
+
+filter.df3 <- df %>%
+    filter(favoriteCount > mean(favoriteCount) + 2*sd(favoriteCount))
+
+filter.df4 <- df %>%
+    arrange(-favoriteCount)
+```
+## plot histogram
+* What is histogram? What is density function?
+```{r}
+hist(df$favoriteCount, breaks = 1000)
+
+df$nchar <-nchar (df$text)
+hist(df$nchar, breaks= 1000)
+```
+## take a glance on the data
+```{r}
+# View(order.df[ ,c(1,3,5,8,10,12)])
+# View(order.df[, c("text","favoriteCount")])
+
+# View(df)
+head(df)
+class(df)
+str(df)
+
+class(df$text)
+class(df$truncated)
+df$truncated
+class(df$favoriteCount)
+class(df)
+mode(df)
+?mode
+```

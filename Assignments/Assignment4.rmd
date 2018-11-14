@@ -1,0 +1,66 @@
+---
+title: "Assignment #4"
+author: "Huang Song Ren b04902099"
+date: "2018/10/17"
+output:
+  html_document:
+    df_print: paged
+    highlight: textmate
+    theme: spacelab
+    toc: yes
+---
+#Problem 1
+>retrieve essential data to data.frame then dump those data to .rds file by saveRDS(data, f).
+
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+# options(stringsAsFactors = FALSE)
+# options(encoding = "UTF-8")
+```
+
+```{r}
+#從第2頁開始爬10頁(20*10=200)
+url1 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E5%88%86%E6%9E%90&area=6001001000&order=2&asc=0&page=2&mode=s&jobsource=n104bank1"
+res1 <- fromJSON(content(GET(url1), "text", encoding = "utf-8"))
+all.df <- res1$data$list
+#為了merge(bind_row)，將all.df$link從list拆分
+all.df$link.applyAnalyze <- all.df$link$applyAnalyze
+all.df$link.job <- all.df$link$job
+all.df$link.cust <- all.df$link$cust
+all.df$link <- NULL
+
+for(i in 3:11){
+	url <- paste0("https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E5%88%86%E6%9E%90&area=6001001000&order=2&asc=0&page=", i, "&mode=s&jobsource=n104bank1")
+	res <- fromJSON(content(GET(url), "text", encoding = "utf-8"))
+	temp.df <- res$data$list
+	temp.df$link.applyAnalyze <- temp.df$link$applyAnalyze
+	temp.df$link.job <- temp.df$link$job
+	temp.df$link.cust <- temp.df$link$cust
+	temp.df$link <- NULL
+	all.df <- bind_rows(all.df, temp.df)
+}
+
+length(unique(all.df$jobNo))
+```
+```{r}
+all.df
+```
+
+```{r}
+saveRDS(all.df, "104_data.rds")
+#test
+data <- readRDS("104_data.rds")
+```
+
+#Problem 2
+>Try to find at least one website whose webpage is rendered from json files.
+>
+>pchome網路購物：
+>
+>原網址(搜尋行動電源)：
+>https://ecshweb.pchome.com.tw/search/v3.3/?q=%E8%A1%8C%E5%8B%95%E9%9B%BB%E6%BA%90&scope=all
+>
+>json：
+>https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=%E8%A1%8C%E5%8B%95%E9%9B%BB%E6%BA%90&page=1&sort=rnk/dc
