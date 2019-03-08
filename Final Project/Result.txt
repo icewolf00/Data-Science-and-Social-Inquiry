@@ -1,0 +1,42 @@
+投給1/2/3 more政黨的廠商數量
+2008
+all firm: 5440
+one party: 5028
+two party: 374
+three more: 38
+2012
+all firm: 4152
+one party: 3838
+two party: 296
+three more: 18
+2016
+all firm: 4162
+one party: 3765
+two party: 358
+three more: 22
+
+投給1/2/3 more政黨的廠商命中率(Q1 中位數 Q3 還有平均值)
+2008
+all firm: 5440
+one party: [ 0.  0.  1.]
+one mean: 0.427104326881
+two party: [ 0.5         0.5         0.66666667]
+two mean: 0.511279429127
+three more: [ 0.33333333  0.5         0.62727273]
+three mean: 0.468439747387
+2012
+all firm: 4152
+one party: [ 0.  1.  1.]
+one mean: 0.6305981538
+two party: [ 0.5         0.5         0.66666667]
+two mean: 0.549243886744
+three more: [ 0.25  0.4   0.63]
+three mean: 0.446289081289
+2016
+all firm: 4162
+one party: [ 0.  1.  1.]
+one mean: 0.684508601539
+two party: [ 0.5   0.5   0.75]
+two mean: 0.609362681081
+three more: [ 0.33333333  0.45        0.66666667]
+three mean: 0.475295159386
